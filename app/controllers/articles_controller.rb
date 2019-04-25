@@ -1,10 +1,11 @@
 class ArticlesController < ApplicationController
+  before_filter :find_article, only: [:show, :edit, :update]
+
   def index
     @articles = Article.all
   end
 
   def show
-    @article = Article.find(params[:id])
   end
 
   def new
@@ -12,22 +13,35 @@ class ArticlesController < ApplicationController
   end
 
   def create
-    @article = Article.new
-    @article.title = params[:title]
-    @article.description = params[:description]
-    @article.save
-    redirect_to article_path(@article)
+    @article = Article.new(article_params)
+    if @article.save
+      @article.save
+      redirect_to @article
+    else
+      render 'new'
+    end
   end
 
   def edit
-    @article = Article.find(params[:id])
   end
 
   def update
-    # raise params.inspect
-    @article = Article.find(params[:id])
-    @article.update(title: params[:article][:title], description: params[:article][:description])
-    @article.save
-    redirect_to article_path(@article)
+    if @article.update(article_params)
+      @article.update(article_params)
+      redirect_to @article
+    else
+      render 'edit'
+    end
   end
+
+  private
+
+  def article_params
+    params.require(:article).permit(:title, :description)
+  end
+
+  def find_article
+    @article = Article.find(params[:id])
+  end
+
 end
